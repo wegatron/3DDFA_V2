@@ -25,8 +25,8 @@ def P2sRt(P):
         t2d: (2,). 2d translation.
     """
     t3d = P[:, 3]
-    R1 = P[0:1, :3]
-    R2 = P[1:2, :3]
+    R1 = P[0:1, :3] # scale x
+    R2 = P[1:2, :3] # scale y
     s = (np.linalg.norm(R1) + np.linalg.norm(R2)) / 2.0
     r1 = R1 / np.linalg.norm(R1)
     r2 = R2 / np.linalg.norm(R2)
@@ -103,13 +103,16 @@ def plot_pose_box(img, P, ver, color=(40, 255, 0), line_width=2):
         kpt: (2, 68) or (3, 68)
     """
     llength = calc_hypotenuse(ver)
+    #print(llength)
+    llength = 106
     point_3d = build_camera_box(llength)
     # Map to 2d image points
     point_3d_homo = np.hstack((point_3d, np.ones([point_3d.shape[0], 1])))  # n x 4
     point_2d = point_3d_homo.dot(P.T)[:, :2]
 
     point_2d[:, 1] = - point_2d[:, 1]
-    point_2d[:, :2] = point_2d[:, :2] - np.mean(point_2d[:4, :2], 0) + np.mean(ver[:2, :27], 1)
+    point_2d[:, :2] = point_2d[:, :2] + np.asarray([500, 500], dtype=int)
+    #point_2d[:, :2] = point_2d[:, :2] - np.mean(point_2d[:4, :2], 0) + np.mean(ver[:2, :27], 1)
     point_2d = np.int32(point_2d.reshape(-1, 2))
 
     # Draw all the lines
@@ -129,11 +132,11 @@ def viz_pose(img, param_lst, ver_lst, show_flag=False, wfp=None):
         P, pose = calc_pose(param)
         img = plot_pose_box(img, P, ver)
         # print(P[:, :3])
-        print(f'yaw: {pose[0]:.1f}, pitch: {pose[1]:.1f}, roll: {pose[2]:.1f}')
+        #print(f'yaw: {pose[0]:.1f}, pitch: {pose[1]:.1f}, roll: {pose[2]:.1f}')
 
     if wfp is not None:
         cv2.imwrite(wfp, img)
-        print(f'Save visualization result to {wfp}')
+        #print(f'Save visualization result to {wfp}')
 
     if show_flag:
         plot_image(img)
